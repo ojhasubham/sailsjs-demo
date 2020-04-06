@@ -1,0 +1,35 @@
+<div id="main-div" style="display: none">
+  <button type="text" class="btn waves-effect waves-light" id="logout" style="float: right ;
+    background-color: #a33d9a">Logout</button>
+  <h2>Home Page</h2>
+  <br />
+  <br />
+  <a type="text" class="btn waves-effect waves-light" href="/profile" style="background-color: #275f79">Profile</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script src=" https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+
+<script>
+  function setAuthenticationHeader() {
+    const token = localStorage.getItem('token');
+    return { 'Authorization': token }
+  }
+
+  $(document).ready(function () {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/';
+    } else {
+      $("#main-div").show();
+    }
+
+    $("#logout").click(function (e) {
+      e.preventDefault()
+      localStorage.removeItem('token')
+      window.location = '/'
+    })
+  })
+</script>

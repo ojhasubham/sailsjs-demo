@@ -1,0 +1,192 @@
+<a class="btn waves-effect waves-light" href="/home" style="float: right">Back</a>
+<h2> Your Profile </h2>
+
+<style>
+  .modal-open .modal {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  button.close {
+    float: "right";
+    cursor: pointer;
+    background: 0 0;
+    border: 8;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    float: right;
+  }
+
+  .fade.in {
+    opacity: 1;
+  }
+
+  .modal .modal-content {
+    padding: 17px;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    background-color: #fafafa;
+    padding: 0;
+    max-height: 42%;
+    width: 55%;
+    margin: auto;
+    overflow-y: auto;
+    border-radius: 2px;
+    will-change: top, opacity;
+  }
+
+  .fade {
+    opacity: 0;
+    -webkit-transition: opacity .15s linear;
+    -o-transition: opacity .15s linear;
+    transition: opacity .15s linear;
+  }
+
+  body {
+    padding: 20px;
+  }
+
+  input {
+    width: 60%;
+    height: 78px;
+    padding: 41px 50px;
+    border: 1px solid #666;
+    background: #cce6ff;
+    font-size: 22px;
+  }
+
+  label {
+    font-size: 20px;
+  }
+</style>
+
+<div class="modal fade" id="changePassModal" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Change Password</h4>
+      </div>
+      <div id="input-field">
+        <div class="input-field col s12 ">
+          <input type="password" id="currentPass" placeholder="Old Password" class="validate">
+        </div>
+        <div class="input-field col s12 ">
+          <input type="password" id="newPass" placeholder="New Password" class="validate">
+        </div>
+        <div class="input-field col s12 ">
+          <input type="password" id="confirmPass" placeholder="Confirm Password" class="validate">
+        </div>
+      </div>
+      <button class="btn waves-effect waves-light" id="changePassSubmit">Submit</button>
+    </div>
+
+  </div>
+</div>
+<label>Name : <span id="lblName"> </span></label><br>
+<label>Email : <span id="lblEmail"></span></label><br>
+<br />
+<br />
+<p><a href="#" data-toggle="modal" data-target="#changePassModal"><u>Click here </u></a> to Change Password</p>
+
+
+</div>
+
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script src=" https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+<script>
+
+  function setAuthenticationHeader() {
+    const token = localStorage.getItem('token');
+    return { 'Authorization': token }
+  }
+
+  $(document).ready(function () {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/';
+    }
+    getProfileData();
+
+    $("#changePassSubmit").click(function (event) {
+      event.preventDefault();
+      changePassword();
+    });
+
+    function getProfileData() {
+      $.ajax(' /user-profile', {
+        method: 'GET',
+        async: true,
+        contentType: 'application/json',
+        processData: false,
+        headers: setAuthenticationHeader(),
+        success: function (response) {
+          $("#lblName").html(response.name);
+          $("#lblEmail").html(response.email);
+        },
+      })
+    }
+
+    function changePassword() {
+      if (!$('#currentPass').val()) {
+        return $.notify('Old Password is required', { type: 'danger' });
+      }
+
+      if (!$('#newPass').val()) {
+        return $.notify('New Password is required', { type: 'danger' });
+      }
+
+      if (!$('#confirmPass').val()) {
+        return $.notify('Confirm password is required', { type: 'danger' });
+      }
+      if ($('#newPass').val() !== $('#confirmPass').val()) {
+        return $.notify('Passwords do not match', 'error');
+      }
+
+      if ($('#newPass').val() === $('#currentPass').val()) {
+        return $.notify('Old Password and New Password is Same', 'error');
+      }
+      $(".loader").show();
+      $.ajax(`/changepassword`, {
+        method: 'POST',
+        async: true,
+        contentType: 'application/json',
+        processData: false,
+        headers: setAuthenticationHeader(),
+        data: JSON.stringify({
+          password: $('#newPass').val(),
+          currentPassword: $('#currentPass').val()
+        }),
+        success: function (response) {
+          if (response.status) {
+            $('#changePassModal').toggle();
+            setTimeout(() => {
+              $(".loader").hide();
+              $.notify(response.message, "success");
+            }, 800);
+          } else {
+            setTimeout(() => {
+              $(".loader").hide();
+              $.notify(response.message, "error");
+            }, 800);
+          }
+        }
+      })
+    }
+  })
+
+
+</script>

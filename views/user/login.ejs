@@ -1,0 +1,88 @@
+<!-- <a type="text" class="btn waves-effect waves-light" href="/signup" style="float: right">Signup</a> -->
+<h2> Login</h2>
+<form>
+  <div class="input-field col s12">
+    <input type="text" id="email" class="validate">
+    <label for="last_name">Email </label>
+  </div>
+  <div class="input-field col s12">
+    <input type="Password" id="password" class="validate">
+    <label for="Password" data-error="wrong" data-success="right">password</label>
+  </div>
+  <div>
+    <button class="btn waves-effect waves-light" id="login" style="background-color: #3075bb;"
+      type="submit">Login</button>
+
+    <a type="text" class="btn waves-effect waves-light" style="background-color: #26a688;" href="/signup">Signup</a>
+
+  </div>
+</form>
+
+<div class="input-field col s12 ">
+  <a href="/forgetPassword">Forget Password </a>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script src=" https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    const token = localStorage.getItem("token")
+    if (token) window.location = "/home"
+    $("#login").click(function (event) {
+      event.preventDefault();
+      login();
+    });
+
+    login = function () {
+
+      if (!$('#email').val()) {
+        return $.notify('Email is required', { type: 'danger' });
+      }
+
+      if (!validateEmailOnClick($('#email').val())) {
+        $.notify('Enter valid email addres');
+        return;
+      }
+
+      if (!$('#password').val()) {
+        return $.notify('Password is required', { type: 'danger' });
+      }
+      $(".loader").show();
+
+      $.ajax('/login', {
+        method: 'POST',
+        contentType: 'application/json',
+        processData: false,
+        data: JSON.stringify({
+          email: $('#email').val(),
+          password: $('#password').val(),
+        }),
+        success: function (response) {
+          if (response.status) {
+            var token2 = `Bearer ${response.token}`;
+            localStorage.setItem("token", token2);
+            setTimeout(() => {
+              $(".loader").hide();
+              window.location = '/home'
+            }, 1000);
+          } else {
+            setTimeout(() => {
+              $(".loader").hide();
+              $.notify(response.message, "error");
+            }, 1000);
+          }
+        },
+      })
+    }
+
+    function validateEmailOnClick(email) {
+      const re = /^(([^<>()\\[\]\\.,;:\s@"]+(\.[^<>()\\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(String(email).toLowerCase());
+    }
+  })
+
+</script>

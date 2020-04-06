@@ -1,0 +1,99 @@
+<a class="previous" href="/" style="float: right">Back to Login</a>
+<h2> Sign UP</h2>
+
+<form>
+  <div class="input-field col s12 ">
+    <input type="text" id="name" class="validate">
+    <label for="first_name"> Name</label>
+  </div>
+  <div class="input-field col s12 ">
+    <input type="text" id="email" class="validate">
+    <label for="last_name">Email </label>
+  </div>
+  <div class="input-field col s12 ">
+    <input type="password" id="password" class="validate">
+    <label for="last_name">Password </label>
+  </div>
+  <div class="input-field col s12 ">
+    <input type="password" id="confirmPassword" class="validate">
+    <label for="last_name">Confirm password </label>
+  </div>
+
+  <div>
+    <button class="btn waves-effect waves-light" style="background-color: #347737" id="submitLogin" type="submit">Submit
+    </button>
+  </div>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script src=" https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $("#submitLogin").click(function (event) {
+      event.preventDefault();
+      signup();
+    });
+
+    signup = function () {
+      if (!$('#name').val()) {
+        return $.notify('Name is required', { type: 'danger' });
+      }
+      if (!$('#email').val()) {
+        return $.notify('Email is required', { type: 'danger' });
+      }
+      if (!validateEmailOnClick($('#email').val())) {
+        $.notify('Enter valid email address');
+        return;
+      }
+      if (!$('#password').val()) {
+        return $.notify('Password is required', { type: 'danger' });
+      }
+
+      if (!$('#confirmPassword').val()) {
+        return $.notify('Confirm password is required', { type: 'danger' });
+      }
+      if ($('#password').val() !== $('#confirmPassword').val()) {
+        return $.notify('Passwords does not match', 'error');
+
+      }
+      $(".loader").show();
+      $.ajax('/signup', {
+        method: 'POST',
+        contentType: 'application/json',
+        processData: false,
+        data: JSON.stringify({
+          name: $('#name').val(),
+          email: $('#email').val(),
+          password: $('#password').val(),
+        }),
+        success: function (result) {
+          if (result.status) {
+            setTimeout(() => {
+              $(".loader").hide();
+              $.notify(result.message, "success");
+            }, 800);
+            setTimeout(() => {
+              window.location.href = "/"
+            }, 2500);
+
+          } else {
+            $.notify(result.message);
+            setTimeout(() => {
+              $(".loader").hide();
+            }, 1000);
+          }
+        }
+      })
+    }
+
+
+    function validateEmailOnClick(email) {
+      const re = /^(([^<>()\\[\]\\.,;:\s@"]+(\.[^<>()\\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(String(email).toLowerCase());
+    }
+  })
+
+</script>
